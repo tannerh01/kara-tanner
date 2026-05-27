@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Kara and Tanner &mdash; Together</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;background:#0D1117;font-family:Georgia,serif;color:#E8E0D5;padding-bottom:80px}
+button{font-family:inherit;cursor:pointer}
+#header{background:linear-gradient(135deg,#1a1f2e 0%,#0D1117 100%);border-bottom:1px solid #2A3040;padding:36px 24px 28px;text-align:center;position:relative;overflow:hidden}
+#header::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle at 20% 50%,rgba(41,128,185,.08) 0%,transparent 60%),radial-gradient(circle at 80% 20%,rgba(155,89,182,.08) 0%,transparent 60%);pointer-events:none}
+.eyebrow{font-size:12px;letter-spacing:4px;color:#7EC8E3;margin-bottom:10px;text-transform:uppercase}
+h1{font-size:clamp(22px,5vw,38px);font-weight:normal;margin:0 0 6px;letter-spacing:-.5px;color:#F0EAE0}
+.subtitle{color:#8A9BB0;font-size:13px;margin:0 0 20px}
+.sync-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:12px;background:#111820;border:1px solid #2A3040;margin-bottom:24px;font-size:11px}
+.sync-dot{width:7px;height:7px;border-radius:50%;display:inline-block;transition:background .4s}
+.progress-wrap{max-width:400px;margin:0 auto}
+.progress-labels{display:flex;justify-content:space-between;margin-bottom:8px;font-size:13px}
+.progress-labels .left{color:#8A9BB0}.progress-labels .right{color:#7EC8E3;font-weight:bold}
+.progress-bar-bg{height:6px;background:#1E2A38;border-radius:3px;overflow:hidden}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,#2980B9,#9B59B6);border-radius:3px;transition:width .6s ease;width:0}
+.share-notice{max-width:720px;margin:16px auto 0;padding:0 16px}
+.share-notice-inner{background:#0F1E2E;border:1px solid #1E3A52;border-radius:10px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;font-size:12px;color:#5A8AAA;line-height:1.75}
+.share-notice-inner strong{color:#7EC8E3}
+.filters{display:flex;justify-content:center;gap:8px;padding:20px 16px 8px;flex-wrap:wrap}
+.filter-btn{padding:8px 18px;border-radius:20px;border:1px solid #2A3040;background:transparent;color:#5A6A7A;font-size:13px;letter-spacing:1px;text-transform:capitalize;transition:all .2s}
+.filter-btn.active-all{border-color:#7EC8E3;background:rgba(126,200,227,.12);color:#7EC8E3}
+.filter-btn.active-him{border-color:#7EC8E3;background:rgba(26,58,92,.53);color:#7EC8E3}
+.filter-btn.active-her{border-color:#F0A0C8;background:rgba(74,26,58,.53);color:#F0A0C8}
+.filter-btn.active-both{border-color:#90D890;background:rgba(26,58,26,.53);color:#90D890}
+.phases{max-width:720px;margin:0 auto;padding:12px 16px 0}
+.phase-card{margin-bottom:16px;border-radius:12px;overflow:hidden;background:#111820}
+.phase-header{width:100%;padding:16px 20px;border:none;display:flex;align-items:center;justify-content:space-between;text-align:left;gap:12px;color:inherit}
+.phase-header-info{flex:1}
+.phase-title-row{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.phase-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
+.phase-title-text{color:#F0EAE0;font-size:15px;font-weight:normal}
+.phase-meta{display:flex;gap:16px;padding-left:18px}
+.phase-timeline{color:#5A6A7A;font-size:12px}
+.phase-chevron{color:#5A6A7A;font-size:20px;transition:transform .2s;line-height:1;flex-shrink:0}
+.phase-chevron.open{transform:rotate(90deg)}
+
+/* Tasks */
+.task-list{list-style:none}
+.task-item{display:flex;align-items:flex-start;gap:10px;padding:12px 20px;border-bottom:1px solid #1A2230;transition:background .15s}
+.task-item:last-child{border-bottom:none}
+.task-item.dragging{opacity:.4;background:#1A2230}
+.task-item.drag-over{border-top:2px solid #2980B9}
+.drag-handle{flex-shrink:0;color:#2A3A4A;font-size:16px;cursor:grab;padding:2px 2px 0;line-height:1;touch-action:none;user-select:none}
+.drag-handle:active{cursor:grabbing;color:#5A6A7A}
+.task-check-wrap{flex-shrink:0;cursor:pointer;padding-top:2px}
+.task-check{width:18px;height:18px;border-radius:4px;display:flex;align-items:center;justify-content:center;transition:all .2s;border:2px solid #2A3A4A}
+.task-check-mark{color:#fff;font-size:11px;line-height:1}
+.task-text{flex:1;font-size:13px;color:#C0C8D0;line-height:1.55;cursor:pointer}
+.task-item.done .task-text{color:#3A4A5A;text-decoration:line-through}
+.task-owner-badge{flex-shrink:0;padding:2px 9px;border-radius:10px;font-size:10px;letter-spacing:.5px;margin-top:2px}
+.custom-tag{flex-shrink:0;font-size:9px;color:#5A6A7A;border:1px solid #2A3040;border-radius:4px;padding:1px 5px;margin-top:3px;letter-spacing:.5px}
+.delete-task-btn{flex-shrink:0;background:none;border:none;color:#2A3A4A;font-size:18px;line-height:1;padding:0 2px;margin-top:0;transition:color .2s}
+.delete-task-btn:hover{color:#E74C3C}
+
+/* Add task */
+.add-task-row{padding:10px 20px;border-top:1px solid #1A2230}
+.add-task-btn{display:flex;align-items:center;gap:6px;background:none;border:1px dashed #2A3040;border-radius:8px;color:#3A4A5A;font-size:12px;padding:7px 14px;transition:all .2s;width:100%}
+.add-task-btn:hover{border-color:#2980B9;color:#7EC8E3}
+.add-task-form{display:none;flex-direction:column;gap:8px;padding:12px 20px;border-top:1px solid #1A2230;background:#0A0F18}
+.add-task-form.open{display:flex}
+.add-task-input{background:#111820;border:1px solid #2A3040;border-radius:8px;padding:9px 12px;color:#E8E0D5;font-size:13px;font-family:Georgia,serif;outline:none;resize:none;line-height:1.5}
+.add-task-input:focus{border-color:#2980B9}
+.add-task-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.owner-select{background:#111820;border:1px solid #2A3040;border-radius:8px;padding:7px 10px;color:#E8E0D5;font-size:12px;outline:none}
+.save-task-btn{padding:7px 16px;border-radius:8px;border:none;background:#2980B9;color:#fff;font-size:12px;transition:background .2s}
+.save-task-btn:hover{background:#3498DB}
+.cancel-task-btn{padding:7px 12px;border-radius:8px;border:1px solid #2A3040;background:none;color:#5A6A7A;font-size:12px}
+.cancel-task-btn:hover{color:#E8E0D5}
+
+.footer{text-align:center;margin-top:40px;color:#2A3A4A;font-size:11px;letter-spacing:3px}
+.init-msg{text-align:center;padding:40px 20px;color:#5A6A7A;font-size:13px}
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div class="eyebrow">Our Moving Journey</div>
+  <h1>Kara and Tanner &mdash; Together</h1>
+  <p class="subtitle">A shared checklist for your next chapter</p>
+  <div class="sync-badge">
+    <span class="sync-dot" id="sync-dot" style="background:#5A6A7A"></span>
+    <span id="sync-label" style="color:#5A6A7A">Connecting&hellip;</span>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-labels">
+      <span class="left" id="progress-text">0 of 0 tasks done</span>
+      <span class="right" id="progress-pct">0%</span>
+    </div>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill"></div></div>
+  </div>
+</div>
+
+<div class="share-notice">
+  <div class="share-notice-inner">
+    <span style="font-size:18px;margin-top:1px">&#9889;</span>
+    <div><strong>Live Firebase sync</strong> &mdash; checks, new tasks, and order changes update instantly on both phones. Share this page URL with your partner &mdash; no setup needed on her end.</div>
+  </div>
+</div>
+
+<div class="filters" id="filters">
+  <button class="filter-btn active-all" data-filter="all">All Tasks</button>
+  <button class="filter-btn" data-filter="him">His Tasks</button>
+  <button class="filter-btn" data-filter="her">Her Tasks</button>
+  <button class="filter-btn" data-filter="both">Both Together</button>
+</div>
+
+<div class="phases" id="phases"><div class="init-msg">Loading&hellip;</div></div>
+<div class="footer">YOUR NEXT CHAPTER</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getDatabase, ref, onValue, set, update, push, remove, get } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDlFITc4TiAhwlnQiAGEJd3wWoQVmv8SQI",
+  authDomain: "kara-tanner.firebaseapp.com",
+  databaseURL: "https://kara-tanner-default-rtdb.firebaseio.com",
+  projectId: "kara-tanner",
+  storageBucket: "kara-tanner.firebasestorage.app",
+  messagingSenderId: "404473802874",
+  appId: "1:404473802874:web:fc72e6baa02b2b3a52cbc3"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getDatabase(app);
+
+const ownerColors = {
+  him:  {bg:'#1A3A5C',text:'#7EC8E3',label:'Him'},
+  her:  {bg:'#4A1A3A',text:'#F0A0C8',label:'Her'},
+  both: {bg:'#1A3A1A',text:'#90D890',label:'Both'}
+};
+
+// ── Master task definitions (source of truth for text/owner) ───────────────
+const PHASE_DEFS = [
+  {id:1,title:'Phase 1: Handle the Divorce',color:'#C0392B',accent:'#E74C3C',timeline:'Months 1\u20136'},
+  {id:2,title:'Phase 2: Get Finances Rental-Ready',color:'#1A5276',accent:'#2980B9',timeline:'Months 2\u20135 (parallel)'},
+  {id:3,title:'Phase 3: Define What You Want',color:'#145A32',accent:'#27AE60',timeline:'Months 5\u20136'},
+  {id:4,title:'Phase 4: Search & Secure the Rental',color:'#6C3483',accent:'#9B59B6',timeline:'Months 6\u20137'},
+  {id:5,title:'Phase 5: The Move',color:'#784212',accent:'#D35400',timeline:'Months 7\u20138'},
+  {id:6,title:'Phase 6: Plan the Future',color:'#2C3E50',accent:'#5D6D7E',timeline:'Ongoing during rental'}
+];
+
+const TASK_DEFS = [
+  {id:'1-1a',phase:1,owner:'him',text:"Google 'uncontested divorce attorney Williamson County TX' and open the top 5\u201310 results"},
+  {id:'1-1b',phase:1,owner:'him',text:"Check each attorney's Google and Avvo reviews \u2014 look for 4.5+ stars and recent reviews"},
+  {id:'1-1c',phase:1,owner:'him',text:'Verify each attorney is licensed and in good standing at texasbar.com'},
+  {id:'1-1d',phase:1,owner:'him',text:'Make a shortlist of 3 attorneys with strong reviews and reasonable flat-fee rates'},
+  {id:'1-1e',phase:1,owner:'him',text:'Call or email each to ask: flat fee or hourly? Do they handle uncontested divorces? How long does it take?'},
+  {id:'1-2a',phase:1,owner:'him',text:'Book consultation appointments with your top 2\u20133 attorneys (many offer free 30-min consults)'},
+  {id:'1-2b',phase:1,owner:'him',text:'Prepare a list of questions to ask: fees, timeline, process, what you need to bring'},
+  {id:'1-2c',phase:1,owner:'him',text:'Attend each consultation and take notes'},
+  {id:'1-2d',phase:1,owner:'him',text:'Compare attorneys on: cost, communication style, experience with property division, and gut feeling'},
+  {id:'1-3a',phase:1,owner:'him',text:'Choose your attorney and sign the engagement agreement'},
+  {id:'1-3b',phase:1,owner:'him',text:'Pay the retainer or flat fee as agreed'},
+  {id:'1-3c',phase:1,owner:'him',text:"Save attorney's phone, email, and office address in your contacts"},
+  {id:'1-4a',phase:1,owner:'him',text:'Have a calm, private conversation with your ex-wife about filing for divorce'},
+  {id:'1-4b',phase:1,owner:'him',text:'Confirm she is in agreement and the divorce will remain uncontested'},
+  {id:'1-4c',phase:1,owner:'him',text:"Ask if she wants her own attorney or if she'll use the same one (in TX, both can use same for uncontested)"},
+  {id:'1-4d',phase:1,owner:'him',text:"Agree on a communication plan \u2014 how you'll stay in touch during the process"},
+  {id:'1-5a',phase:1,owner:'him',text:'Locate your Cedar Park home deed and mortgage statement'},
+  {id:'1-5b',phase:1,owner:'him',text:'Locate marriage certificate (needed for filing)'},
+  {id:'1-5c',phase:1,owner:'him',text:'Gather most recent statements for all joint bank accounts'},
+  {id:'1-5d',phase:1,owner:'him',text:'Gather most recent statements for all joint credit cards and debts'},
+  {id:'1-5e',phase:1,owner:'him',text:'List all assets acquired during the marriage (vehicles, savings, retirement accounts)'},
+  {id:'1-5f',phase:1,owner:'him',text:"List all debts \u2014 who owes what, and whose name it's in"},
+  {id:'1-5g',phase:1,owner:'him',text:'Organize all documents in a folder (physical or digital) to bring to attorney'},
+  {id:'1-6a',phase:1,owner:'both',text:'Sit down together and discuss 3 options for his Cedar Park home: sell, rent out, or keep'},
+  {id:'1-6b',phase:1,owner:'both',text:'Sit down together and discuss 3 options for her Lago Vista home: sell, rent out, or keep'},
+  {id:'1-6c',phase:1,owner:'both',text:'Look up current home values on Zillow or Realtor.com for both homes'},
+  {id:'1-6d',phase:1,owner:'both',text:'Calculate potential rental income for each home if you were to rent them out'},
+  {id:'1-6e',phase:1,owner:'both',text:'Decide and write down the final plan for each home'},
+  {id:'1-7a',phase:1,owner:'him',text:'Work with attorney to complete the Original Petition for Divorce paperwork'},
+  {id:'1-7b',phase:1,owner:'him',text:'Review and sign all documents before filing'},
+  {id:'1-7c',phase:1,owner:'him',text:'Attorney files petition with Williamson County District Clerk'},
+  {id:'1-7d',phase:1,owner:'him',text:'Receive and save your case number for all future court correspondence'},
+  {id:'1-7e',phase:1,owner:'him',text:'Note the 60-day waiting period start date on your calendar'},
+  {id:'1-8a',phase:1,owner:'him',text:'Discuss with attorney whether ex will sign a Waiver of Service (simplest option)'},
+  {id:'1-8b',phase:1,owner:'him',text:'If waiver used: have ex sign and notarize the Waiver of Service form'},
+  {id:'1-8c',phase:1,owner:'him',text:'If waiver not used: arrange for constable or process server to serve papers'},
+  {id:'1-8d',phase:1,owner:'him',text:'Confirm service is complete and return of service is filed with the court'},
+  {id:'1-9a',phase:1,owner:'him',text:'Work with attorney to draft the Final Decree of Divorce and property settlement'},
+  {id:'1-9b',phase:1,owner:'him',text:'Review every line of the decree carefully \u2014 especially property, debt, and name change sections'},
+  {id:'1-9c',phase:1,owner:'him',text:'Share draft with ex-wife for her review and approval'},
+  {id:'1-9d',phase:1,owner:'him',text:'Request any changes and finalize the agreed decree'},
+  {id:'1-10a',phase:1,owner:'him',text:'Schedule the final prove-up hearing with the court (after 60-day waiting period)'},
+  {id:'1-10b',phase:1,owner:'him',text:'Attend the hearing with attorney (typically 10\u201315 minutes for uncontested)'},
+  {id:'1-10c',phase:1,owner:'him',text:'Receive the signed Final Decree of Divorce from the judge'},
+  {id:'1-11a',phase:1,owner:'him',text:'Order at least 3 certified copies of the divorce decree from the District Clerk'},
+  {id:'1-11b',phase:1,owner:'him',text:'Store one copy in a secure home location (safe or lockbox)'},
+  {id:'1-11c',phase:1,owner:'him',text:'Store one copy digitally (scan to Google Drive or iCloud)'},
+  {id:'1-11d',phase:1,owner:'him',text:'Give one copy to your attorney to keep on file'},
+  {id:'2-1a',phase:2,owner:'him',text:'Go to annualcreditreport.com and request all 3 reports (Equifax, Experian, TransUnion)'},
+  {id:'2-1b',phase:2,owner:'him',text:'Download and save all 3 credit reports as PDFs'},
+  {id:'2-1c',phase:2,owner:'him',text:'Review each report line by line for errors, old accounts, or fraud'},
+  {id:'2-1d',phase:2,owner:'him',text:'Note your credit score range \u2014 landlords typically want 650+'},
+  {id:'2-2a',phase:2,owner:'her',text:'Go to annualcreditreport.com and request all 3 reports (Equifax, Experian, TransUnion)'},
+  {id:'2-2b',phase:2,owner:'her',text:'Download and save all 3 credit reports as PDFs'},
+  {id:'2-2c',phase:2,owner:'her',text:'Review each report line by line for errors, old accounts, or fraud'},
+  {id:'2-2d',phase:2,owner:'her',text:'Note your credit score range \u2014 landlords typically want 650+'},
+  {id:'2-3a',phase:2,owner:'him',text:'List any inaccurate items found on your credit reports'},
+  {id:'2-3b',phase:2,owner:'him',text:'File dispute online with each bureau that has errors (Equifax, Experian, TransUnion each have dispute portals)'},
+  {id:'2-3c',phase:2,owner:'him',text:'Follow up after 30 days to confirm disputes were resolved'},
+  {id:'2-3d',phase:2,owner:'him',text:'Pull updated credit reports to confirm errors are removed'},
+  {id:'2-4a',phase:2,owner:'her',text:'List any inaccurate items found on your credit reports'},
+  {id:'2-4b',phase:2,owner:'her',text:'File dispute online with each bureau that has errors'},
+  {id:'2-4c',phase:2,owner:'her',text:'Follow up after 30 days to confirm disputes were resolved'},
+  {id:'2-4d',phase:2,owner:'her',text:'Pull updated credit reports to confirm errors are removed'},
+  {id:'2-5a',phase:2,owner:'him',text:'Write down your monthly gross income (before taxes)'},
+  {id:'2-5b',phase:2,owner:'him',text:'Write down your monthly net income (take-home pay)'},
+  {id:'2-5c',phase:2,owner:'him',text:'List all monthly obligations: mortgage, car, insurance, subscriptions, debts'},
+  {id:'2-5d',phase:2,owner:'him',text:'Calculate your monthly disposable income after all obligations'},
+  {id:'2-6a',phase:2,owner:'her',text:'Write down your monthly gross income (before taxes)'},
+  {id:'2-6b',phase:2,owner:'her',text:'Write down your monthly net income (take-home pay)'},
+  {id:'2-6c',phase:2,owner:'her',text:'List all monthly obligations: mortgage, car, insurance, subscriptions, debts'},
+  {id:'2-6d',phase:2,owner:'her',text:'Calculate your monthly disposable income after all obligations'},
+  {id:'2-7a',phase:2,owner:'both',text:'Share income and obligations numbers with each other openly'},
+  {id:'2-7b',phase:2,owner:'both',text:'Add both incomes together and divide by 3 to get your max rent number'},
+  {id:'2-7c',phase:2,owner:'both',text:'Set a firm max rent budget and write it down'},
+  {id:'2-7d',phase:2,owner:'both',text:'Discuss how rent and utilities will be split between you'},
+  {id:'2-8a',phase:2,owner:'both',text:'Calculate total move-in cost target: first month + last month + deposit (estimate 2.5x your target rent)'},
+  {id:'2-8b',phase:2,owner:'him',text:'Open or designate a savings account specifically for move-in costs'},
+  {id:'2-8c',phase:2,owner:'her',text:'Open or designate a savings account specifically for move-in costs'},
+  {id:'2-8d',phase:2,owner:'both',text:'Set up automatic monthly transfers into your respective move-in savings'},
+  {id:'2-8e',phase:2,owner:'both',text:'Track savings monthly \u2014 set a calendar reminder to check progress'},
+  {id:'2-9a',phase:2,owner:'him',text:'Locate and scan/photograph your 2023 federal tax return (Form 1040)'},
+  {id:'2-9b',phase:2,owner:'him',text:'Locate and scan/photograph your 2024 federal tax return (Form 1040)'},
+  {id:'2-9c',phase:2,owner:'him',text:'Print or save your 3 most recent pay stubs'},
+  {id:'2-9d',phase:2,owner:'him',text:'Download 3 months of bank statements from your primary checking account'},
+  {id:'2-9e',phase:2,owner:'him',text:"Organize all documents into a labeled folder: 'Rental Application \u2014 Him'"},
+  {id:'2-10a',phase:2,owner:'her',text:'Locate and scan/photograph your 2023 federal tax return (Form 1040)'},
+  {id:'2-10b',phase:2,owner:'her',text:'Locate and scan/photograph your 2024 federal tax return (Form 1040)'},
+  {id:'2-10c',phase:2,owner:'her',text:'Print or save your 3 most recent pay stubs'},
+  {id:'2-10d',phase:2,owner:'her',text:'Download 3 months of bank statements from your primary checking account'},
+  {id:'2-10e',phase:2,owner:'her',text:"Organize all documents into a labeled folder: 'Rental Application \u2014 Her'"},
+  {id:'2-11a',phase:2,owner:'him',text:'Contact your HR or manager and request an employment verification letter'},
+  {id:'2-11b',phase:2,owner:'him',text:'Ask that the letter include: your name, job title, start date, employment status, and annual salary'},
+  {id:'2-11c',phase:2,owner:'him',text:'Review letter when received and confirm all details are accurate'},
+  {id:'2-11d',phase:2,owner:'him',text:'Save signed letter to your rental application folder'},
+  {id:'2-12a',phase:2,owner:'her',text:'Contact your HR or manager and request an employment verification letter'},
+  {id:'2-12b',phase:2,owner:'her',text:'Ask that the letter include: your name, job title, start date, employment status, and annual salary'},
+  {id:'2-12c',phase:2,owner:'her',text:'Review letter when received and confirm all details are accurate'},
+  {id:'2-12d',phase:2,owner:'her',text:'Save signed letter to your rental application folder'},
+  {id:'2-13a',phase:2,owner:'him',text:"Search 'property management companies Cedar Park TX' and make a list of 3\u20135 options"},
+  {id:'2-13b',phase:2,owner:'him',text:'Call each company and ask their fee structure (typically 8\u201312% of monthly rent)'},
+  {id:'2-13c',phase:2,owner:'him',text:'Ask each company: what services are included? Tenant screening? Maintenance? Rent collection?'},
+  {id:'2-13d',phase:2,owner:'him',text:'Check Google reviews for each Cedar Park property management company'},
+  {id:'2-13e',phase:2,owner:'him',text:'Research what your Cedar Park home could rent for (check Zillow, Rentometer.com)'},
+  {id:'2-14a',phase:2,owner:'her',text:"Search 'property management companies Lago Vista TX' and make a list of 3\u20135 options"},
+  {id:'2-14b',phase:2,owner:'her',text:'Call each company and ask their fee structure'},
+  {id:'2-14c',phase:2,owner:'her',text:'Ask each company: what services are included? Tenant screening? Maintenance? Rent collection?'},
+  {id:'2-14d',phase:2,owner:'her',text:'Check Google reviews for each Lago Vista property management company'},
+  {id:'2-14e',phase:2,owner:'her',text:'Research what your Lago Vista home could rent for (check Zillow, Rentometer.com)'},
+  {id:'2-15a',phase:2,owner:'both',text:'Share your property management research notes with each other'},
+  {id:'2-15b',phase:2,owner:'both',text:'Weigh the financial pros/cons of renting vs. selling each home'},
+  {id:'2-15c',phase:2,owner:'both',text:'Make and document your final decision for each home in writing'},
+  {id:'2-15d',phase:2,owner:'him',text:'If renting Cedar Park home: contact your top property management pick and begin onboarding'},
+  {id:'2-15e',phase:2,owner:'her',text:'If renting Lago Vista home: contact your top property management pick and begin onboarding'},
+  {id:'3-1a',phase:3,owner:'him',text:'Write your personal must-have list: min bedrooms, bathrooms, garage, yard, pets, home office, etc.'},
+  {id:'3-1b',phase:3,owner:'him',text:'Write your nice-to-have list: pool, proximity to work, neighborhood feel, storage, etc.'},
+  {id:'3-1c',phase:3,owner:'her',text:'Write your personal must-have list: min bedrooms, bathrooms, garage, yard, pets, home office, etc.'},
+  {id:'3-1d',phase:3,owner:'her',text:'Write your nice-to-have list: pool, proximity to work, neighborhood feel, storage, etc.'},
+  {id:'3-2a',phase:3,owner:'both',text:'Share your lists with each other and read them together'},
+  {id:'3-2b',phase:3,owner:'both',text:'Highlight items that appear on BOTH your must-have lists \u2014 these are non-negotiables'},
+  {id:'3-2c',phase:3,owner:'both',text:'Discuss items that conflict or differ and find a compromise'},
+  {id:'3-2d',phase:3,owner:'both',text:'Create one combined must-have list and one combined nice-to-have list'},
+  {id:'3-2e',phase:3,owner:'both',text:'Rank the nice-to-haves in order of shared priority'},
+  {id:'3-3a',phase:3,owner:'both',text:'Open Google Maps and draw a rough boundary for your target rental area'},
+  {id:'3-3b',phase:3,owner:'him',text:'Check your commute time from Cedar Park and Leander to your workplace'},
+  {id:'3-3c',phase:3,owner:'her',text:'Check your commute time from Cedar Park and Leander to your workplace'},
+  {id:'3-3d',phase:3,owner:'both',text:'Research neighborhoods in Cedar Park and Leander \u2014 schools, safety, walkability, feel'},
+  {id:'3-3e',phase:3,owner:'both',text:'Drive through your top 2\u20133 neighborhood candidates together on a weekend'},
+  {id:'3-4a',phase:3,owner:'both',text:'Revisit your max rent number from Phase 2 and confirm it still makes sense'},
+  {id:'3-4b',phase:3,owner:'both',text:'Add estimated utility costs (electric, water, internet, trash) to get total monthly housing cost'},
+  {id:'3-4c',phase:3,owner:'both',text:"Set a firm 'walk away' number \u2014 the maximum you will not exceed under any circumstances"},
+  {id:'3-5a',phase:3,owner:'both',text:'Decide your ideal lease length (2 years preferred, 3 years max)'},
+  {id:'3-5b',phase:3,owner:'both',text:"Discuss what happens if you want to leave before the lease ends \u2014 what's your risk tolerance?"},
+  {id:'3-5c',phase:3,owner:'both',text:"Decide if you'll walk away from a property if landlord won't offer more than 1 year"},
+  {id:'3-6a',phase:3,owner:'both',text:'Talk about how household chores will be divided'},
+  {id:'3-6b',phase:3,owner:'both',text:'Talk about how shared expenses (groceries, utilities, household items) will be split'},
+  {id:'3-6c',phase:3,owner:'both',text:'Discuss any personal habits or routines that might affect living together (sleep schedules, guests, tidiness)'},
+  {id:'3-6d',phase:3,owner:'both',text:'Agree on a simple shared household budget or expense-tracking method'},
+  {id:'4-1a',phase:4,owner:'both',text:"Search 'tenant representative real estate agent Cedar Park TX' on Google"},
+  {id:'4-1b',phase:4,owner:'both',text:'Ask friends, coworkers, or neighbors in Cedar Park for agent recommendations'},
+  {id:'4-1c',phase:4,owner:'both',text:"Call or email 2\u20133 agents \u2014 confirm they work with renters and won't charge you a fee"},
+  {id:'4-1d',phase:4,owner:'both',text:'Choose one agent and let them know your must-haves, budget, and timeline'},
+  {id:'4-1e',phase:4,owner:'both',text:'Ask agent to set up MLS alerts for rental listings that match your criteria'},
+  {id:'4-2a',phase:4,owner:'him',text:'Create a saved search on Zillow.com for Cedar Park rentals and enable alerts'},
+  {id:'4-2b',phase:4,owner:'her',text:'Create a saved search on Realtor.com for Cedar Park rentals and enable alerts'},
+  {id:'4-2c',phase:4,owner:'him',text:'Create a saved search on Apartments.com for Cedar Park rentals and enable alerts'},
+  {id:'4-2d',phase:4,owner:'both',text:'Also check Hotpads.com and Rent.com for additional listings'},
+  {id:'4-3a',phase:4,owner:'him',text:"Join Facebook groups: 'Cedar Park TX Rentals' and 'Williamson County Rentals'"},
+  {id:'4-3b',phase:4,owner:'her',text:'Check Facebook Marketplace Rentals, filtered to Cedar Park area'},
+  {id:'4-3c',phase:4,owner:'both',text:'Message any promising private landlord listings promptly \u2014 these go fast'},
+  {id:'4-4a',phase:4,owner:'both',text:'As listings come in, evaluate each against your combined must-have list before scheduling'},
+  {id:'4-4b',phase:4,owner:'both',text:'Schedule tours for any home that passes initial screening \u2014 aim for at least 5 tours'},
+  {id:'4-4c',phase:4,owner:'both',text:'During each tour: check water pressure, outlets, cell signal, storage, natural light, and noise level'},
+  {id:'4-4d',phase:4,owner:'both',text:'Ask landlord/agent: how old is the roof, HVAC, and water heater?'},
+  {id:'4-4e',phase:4,owner:'both',text:"Ask landlord/agent: what's the average monthly electric bill? Who handles maintenance?"},
+  {id:'4-4f',phase:4,owner:'both',text:'Take photos and short videos inside every room of every home you tour'},
+  {id:'4-5a',phase:4,owner:'both',text:'After each tour, independently rate the home 1\u201310 on your must-haves before discussing'},
+  {id:'4-5b',phase:4,owner:'both',text:"Compare scores and discuss what each of you liked and didn't like"},
+  {id:'4-5c',phase:4,owner:'both',text:'Keep a running comparison sheet of all homes toured (address, rent, pros, cons, score)'},
+  {id:'4-6a',phase:4,owner:'both',text:"Once you've toured at least 5 homes, compare your top 2\u20133 choices side by side"},
+  {id:'4-6b',phase:4,owner:'both',text:'Confirm your top pick is within budget including utilities'},
+  {id:'4-6c',phase:4,owner:'both',text:'Confirm landlord is open to a 2\u20133 year lease before getting too excited'},
+  {id:'4-6d',phase:4,owner:'both',text:'Research the landlord or management company \u2014 Google them, check BBB, look for reviews'},
+  {id:'4-6e',phase:4,owner:'both',text:'If a private landlord, search their name and the property address on the county appraisal district site to verify ownership'},
+  {id:'4-7a',phase:4,owner:'both',text:'Draft a 1-page tenant cover letter together \u2014 introduce yourselves, your professions, and why you want a long-term home'},
+  {id:'4-7b',phase:4,owner:'both',text:'Mention your stable employment, combined income, and intent to rent for 2\u20133 years'},
+  {id:'4-7c',phase:4,owner:'both',text:'Keep it warm and personal \u2014 landlords rent to people they feel good about'},
+  {id:'4-7d',phase:4,owner:'both',text:'Proofread the letter and save as a PDF'},
+  {id:'4-8a',phase:4,owner:'him',text:'Complete your portion of the rental application fully and accurately'},
+  {id:'4-8b',phase:4,owner:'her',text:'Complete your portion of the rental application fully and accurately'},
+  {id:'4-8c',phase:4,owner:'both',text:'Attach your cover letter, employment letters, pay stubs, and bank statements to the application'},
+  {id:'4-8d',phase:4,owner:'both',text:'Pay any application fees (typically $35\u201375 per person for background/credit check)'},
+  {id:'4-8e',phase:4,owner:'both',text:"Follow up with landlord 2 business days after submitting if you haven't heard back"},
+  {id:'4-9a',phase:4,owner:'both',text:'Read the entire lease document \u2014 do not skip sections'},
+  {id:'4-9b',phase:4,owner:'both',text:'Find and highlight the early termination clause \u2014 what is the penalty for leaving early?'},
+  {id:'4-9c',phase:4,owner:'both',text:'Check for any rent increase caps \u2014 can they raise rent mid-lease?'},
+  {id:'4-9d',phase:4,owner:'both',text:'Check the pet policy (if applicable) and any pet deposit requirements'},
+  {id:'4-9e',phase:4,owner:'both',text:"Confirm what is and isn't allowed: painting walls, hanging things, subletting, etc."},
+  {id:'4-9f',phase:4,owner:'both',text:'Note who is responsible for lawn care, pest control, and minor repairs'},
+  {id:'4-9g',phase:4,owner:'both',text:'If anything is unclear or concerning, ask landlord to clarify in writing before signing'},
+  {id:'4-10a',phase:4,owner:'him',text:'Confirm with your attorney that divorce is fully finalized before signing any lease'},
+  {id:'4-10b',phase:4,owner:'him',text:'Have your certified divorce decree on hand in case landlord requests it'},
+  {id:'4-11a',phase:4,owner:'both',text:'Request any agreed-upon changes to the lease be made in writing before signing'},
+  {id:'4-11b',phase:4,owner:'both',text:'Sign the lease \u2014 both of you should be named as co-tenants'},
+  {id:'4-11c',phase:4,owner:'both',text:"Pay the security deposit via certified check or cashier's check (get a receipt)"},
+  {id:'4-11d',phase:4,owner:'both',text:"Pay first month's rent and last month's rent if required (get receipts for both)"},
+  {id:'4-11e',phase:4,owner:'both',text:'Get copies of the signed lease \u2014 save both digitally and physically'},
+  {id:'5-1a',phase:5,owner:'both',text:'Decide: hire movers, rent a truck, or a mix of both?'},
+  {id:'5-1b',phase:5,owner:'him',text:'Get at least 3 quotes from moving companies for your Cedar Park home'},
+  {id:'5-1c',phase:5,owner:'her',text:'Get at least 3 quotes from moving companies for your Lago Vista home'},
+  {id:'5-1d',phase:5,owner:'both',text:'Check each mover on Google, Yelp, and FMCSA.dot.gov (for licensed movers)'},
+  {id:'5-1e',phase:5,owner:'both',text:'Book your preferred movers at least 4\u20136 weeks before move-in date'},
+  {id:'5-1f',phase:5,owner:'both',text:'Confirm move date, time, and total cost in writing with the moving company'},
+  {id:'5-2a',phase:5,owner:'him',text:'Go room by room in your Cedar Park home and sort everything: keep, donate, sell, toss'},
+  {id:'5-2b',phase:5,owner:'her',text:'Go room by room in your Lago Vista home and sort everything: keep, donate, sell, toss'},
+  {id:'5-2c',phase:5,owner:'him',text:'List items to sell on Facebook Marketplace or OfferUp'},
+  {id:'5-2d',phase:5,owner:'her',text:'List items to sell on Facebook Marketplace or OfferUp'},
+  {id:'5-2e',phase:5,owner:'him',text:'Schedule a donation pickup or drop-off (Habitat for Humanity, Goodwill, etc.)'},
+  {id:'5-2f',phase:5,owner:'her',text:'Schedule a donation pickup or drop-off (Habitat for Humanity, Goodwill, etc.)'},
+  {id:'5-3a',phase:5,owner:'both',text:'Measure the rooms in your new rental home (or get measurements from the landlord)'},
+  {id:'5-3b',phase:5,owner:'both',text:'Sketch or use a free app (Roomstyler, Planner5D) to plan furniture layout in each room'},
+  {id:'5-3c',phase:5,owner:'both',text:'Decide which furniture from each home will go into the new rental'},
+  {id:'5-3d',phase:5,owner:'both',text:'Identify any furniture that will be duplicated and decide who keeps or sells theirs'},
+  {id:'5-3e',phase:5,owner:'both',text:"Note any furniture or items you'll need to buy for the new home"},
+  {id:'5-4a',phase:5,owner:'him',text:'Identify which electric provider serves the new address (Pedernales Electric Cooperative is common in Cedar Park)'},
+  {id:'5-4b',phase:5,owner:'him',text:'Call or go online to set up new electric service \u2014 schedule start date for move-in day'},
+  {id:'5-4c',phase:5,owner:'him',text:'Also notify your current electric provider of your move-out date at Cedar Park home'},
+  {id:'5-5a',phase:5,owner:'her',text:'Look up which internet providers serve the new address (Google Fiber, Spectrum, AT&T are common in Cedar Park)'},
+  {id:'5-5b',phase:5,owner:'her',text:'Compare speeds and prices \u2014 get gigabit service if available'},
+  {id:'5-5c',phase:5,owner:'her',text:'Schedule internet installation for move-in week (book early \u2014 installation slots fill up)'},
+  {id:'5-6a',phase:5,owner:'both',text:'Confirm with landlord which utilities they pay vs. which you pay'},
+  {id:'5-6b',phase:5,owner:'both',text:'If water/trash not included, contact the city of Cedar Park to set up service'},
+  {id:'5-6c',phase:5,owner:'both',text:'If gas service is needed, contact Atmos Energy or the relevant provider'},
+  {id:'5-7a',phase:5,owner:'both',text:'Schedule a pre-move-in walkthrough with the landlord before bringing any belongings'},
+  {id:'5-7b',phase:5,owner:'both',text:'Bring a phone for photos and video \u2014 document every wall, floor, appliance, fixture, and surface'},
+  {id:'5-7c',phase:5,owner:'both',text:"Note any pre-existing damage on the landlord's move-in checklist form"},
+  {id:'5-7d',phase:5,owner:'both',text:'Send all photos and video to the landlord via email immediately after the walkthrough'},
+  {id:'5-7e',phase:5,owner:'both',text:'Keep copies of all photos and emails saved to cloud storage (Google Drive or iCloud)'},
+  {id:'5-8a',phase:5,owner:'him',text:'Pack belongings by room, labeling each box with contents and destination room'},
+  {id:'5-8b',phase:5,owner:'him',text:"Pack an 'essentials box' to open first: toiletries, phone charger, change of clothes, coffee maker"},
+  {id:'5-8c',phase:5,owner:'him',text:'Confirm moving crew arrival time the day before your move'},
+  {id:'5-8d',phase:5,owner:'him',text:'Do a final walkthrough of your Cedar Park home before leaving \u2014 check every room, cabinet, closet'},
+  {id:'5-8e',phase:5,owner:'him',text:'Return keys to landlord or property manager if vacating your Cedar Park home'},
+  {id:'5-9a',phase:5,owner:'her',text:'Pack belongings by room, labeling each box with contents and destination room'},
+  {id:'5-9b',phase:5,owner:'her',text:"Pack an 'essentials box' to open first: toiletries, phone charger, change of clothes, coffee maker"},
+  {id:'5-9c',phase:5,owner:'her',text:'Confirm moving crew arrival time the day before your move'},
+  {id:'5-9d',phase:5,owner:'her',text:'Do a final walkthrough of your Lago Vista home before leaving \u2014 check every room, cabinet, closet'},
+  {id:'5-9e',phase:5,owner:'her',text:'Return keys to landlord or property manager if vacating your Lago Vista home'},
+  {id:'5-10a',phase:5,owner:'him',text:'File USPS mail forwarding at usps.com/move \u2014 forward mail from Cedar Park address to new one'},
+  {id:'5-10b',phase:5,owner:'him',text:'Update address with your bank(s) online or in-app'},
+  {id:'5-10c',phase:5,owner:'him',text:'Update address on your credit cards online or in-app'},
+  {id:'5-10d',phase:5,owner:'him',text:"Go to a Texas DPS office and update your driver's license address (required within 30 days of move)"},
+  {id:'5-10e',phase:5,owner:'him',text:"Update address with your employer's HR for payroll and W-2 purposes"},
+  {id:'5-10f',phase:5,owner:'him',text:'Update address with the IRS at irs.gov or file Form 8822'},
+  {id:'5-10g',phase:5,owner:'him',text:'Update voter registration at VoteTexas.gov'},
+  {id:'5-10h',phase:5,owner:'him',text:'Update address on Amazon, PayPal, and any other frequent delivery or payment accounts'},
+  {id:'5-11a',phase:5,owner:'her',text:'File USPS mail forwarding at usps.com/move \u2014 forward mail from Lago Vista address to new one'},
+  {id:'5-11b',phase:5,owner:'her',text:'Update address with your bank(s) online or in-app'},
+  {id:'5-11c',phase:5,owner:'her',text:'Update address on your credit cards online or in-app'},
+  {id:'5-11d',phase:5,owner:'her',text:"Go to a Texas DPS office and update your driver's license address (required within 30 days of move)"},
+  {id:'5-11e',phase:5,owner:'her',text:"Update address with your employer's HR for payroll and W-2 purposes"},
+  {id:'5-11f',phase:5,owner:'her',text:'Update address with the IRS at irs.gov or file Form 8822'},
+  {id:'5-11g',phase:5,owner:'her',text:'Update voter registration at VoteTexas.gov'},
+  {id:'5-11h',phase:5,owner:'her',text:'Update address on Amazon, PayPal, and any other frequent delivery or payment accounts'},
+  {id:'5-12a',phase:5,owner:'him',text:"Call your homeowner's insurance provider and notify them of your current home's status (vacant, rented, etc.)"},
+  {id:'5-12b',phase:5,owner:'her',text:"Call your homeowner's insurance provider and notify them of your current home's status (vacant, rented, etc.)"},
+  {id:'5-12c',phase:5,owner:'both',text:"Purchase a renters insurance policy for the new home (typically $15\u201325/month \u2014 covers your belongings)"},
+  {id:'5-12d',phase:5,owner:'both',text:'Update your auto insurance to reflect your new address'},
+  {id:'5-13a',phase:5,owner:'both',text:'Choose a shared expense tracking method: Splitwise, a shared spreadsheet, or a joint account'},
+  {id:'5-13b',phase:5,owner:'both',text:"List all recurring household expenses and who will pay each (or how you'll split)"},
+  {id:'5-13c',phase:5,owner:'both',text:'Set up any automatic payments for rent, utilities, and subscriptions'},
+  {id:'5-13d',phase:5,owner:'both',text:"Establish a monthly 'household budget check-in' to review shared expenses together"},
+  {id:'6-1a',phase:6,owner:'both',text:"Each make a personal list of states or regions you'd love to live in and why"},
+  {id:'6-1b',phase:6,owner:'both',text:'Compare lists and identify any states you both have interest in'},
+  {id:'6-1c',phase:6,owner:'both',text:'Research cost of living in your top 2\u20133 states (NerdWallet and BestPlaces.net are good resources)'},
+  {id:'6-1d',phase:6,owner:'both',text:'Research state income tax, property tax rates, and overall affordability'},
+  {id:'6-1e',phase:6,owner:'both',text:'If possible, plan a long-weekend trip to your top state candidate to experience it firsthand'},
+  {id:'6-1f',phase:6,owner:'both',text:'Narrow your list to 1\u20132 target states within the first year of renting'},
+  {id:'6-2a',phase:6,owner:'both',text:'Set up Zillow or Realtor.com saved searches in your target out-of-state area'},
+  {id:'6-2b',phase:6,owner:'both',text:'Follow a local real estate agent in your target area on social media or YouTube'},
+  {id:'6-2c',phase:6,owner:'both',text:'Monitor home prices quarterly \u2014 note whether the market is rising or cooling'},
+  {id:'6-2d',phase:6,owner:'both',text:'Research specific neighborhoods or towns within your target area that match your lifestyle'},
+  {id:'6-3a',phase:6,owner:'him',text:'Research capital gains tax rules for your Cedar Park home \u2014 primary residence exclusion may apply if sold within 3 years of moving out'},
+  {id:'6-3b',phase:6,owner:'him',text:'Consult a CPA or tax advisor about the best time to sell relative to tax implications'},
+  {id:'6-3c',phase:6,owner:'him',text:'Set a target decision date for whether to sell Cedar Park home before or after moving'},
+  {id:'6-4a',phase:6,owner:'her',text:'Research capital gains tax rules for your Lago Vista home \u2014 same primary residence exclusion may apply'},
+  {id:'6-4b',phase:6,owner:'her',text:'Consult a CPA or tax advisor about the best time to sell relative to tax implications'},
+  {id:'6-4c',phase:6,owner:'her',text:'Set a target decision date for whether to sell Lago Vista home before or after moving'},
+  {id:'6-5a',phase:6,owner:'both',text:'Search for a fee-only financial advisor (not commission-based) in the Austin area'},
+  {id:'6-5b',phase:6,owner:'both',text:'Schedule an initial meeting to share your full financial picture and 3-year goal'},
+  {id:'6-5c',phase:6,owner:'both',text:'Get a savings target: how much do you need saved for a down payment in your target state?'},
+  {id:'6-5d',phase:6,owner:'both',text:'Set a calendar reminder to meet with your financial advisor every 12 months'},
+  {id:'6-6a',phase:6,owner:'both',text:'About 18 months before your target move, start researching mortgage lenders in your target state'},
+  {id:'6-6b',phase:6,owner:'both',text:'About 12 months before, get pre-qualified (soft credit check, no commitment) with 2\u20133 lenders'},
+  {id:'6-6c',phase:6,owner:'both',text:'Understand how your TX home equity and sale proceeds will affect your down payment'},
+  {id:'6-6d',phase:6,owner:'both',text:'About 6 months before, get a full mortgage pre-approval letter so you can make offers quickly'},
+  {id:'6-6e',phase:6,owner:'both',text:'Find a buyer agent in your target out-of-state area and begin your home search in earnest'}
+];
+
+// Build a lookup map for task definitions
+const TASK_MAP = {};
+TASK_DEFS.forEach(t => { TASK_MAP[t.id] = t; });
+
+// ── Firebase refs ──────────────────────────────────────
+const checkRef    = ref(db, 'checked');
+const orderRef    = ref(db, 'order');
+const customRef   = ref(db, 'custom');
+
+// ── App state ──────────────────────────────────────────
+let checkedState  = {};   // {taskId: true}
+let orderState    = {};   // {phaseId: [taskId, taskId, ...]}
+let customState   = {};   // {firebaseKey: {phase, owner, text}}
+let currentFilter = 'all';
+let expanded      = {1:true,2:false,3:false,4:false,5:false,6:false};
+let initialized   = false;
+let dragSrcPhase  = null;
+let dragSrcIdx    = null;
+
+// ── Sync status ────────────────────────────────────────
+function setSyncStatus(s) {
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-label');
+  const m = {
+    connected: ['#27AE60','Live \u2713'],
+    saving:    ['#F39C12','Saving\u2026'],
+    error:     ['#E74C3C','Sync error'],
+    init:      ['#F39C12','Setting up\u2026'],
+    connecting:['#5A6A7A','Connecting\u2026']
+  };
+  const [c,l] = m[s]||['#5A6A7A',s];
+  dot.style.background=c; lbl.style.color=c; lbl.textContent=l;
+}
+
+// ── Initialise order in Firebase (first load only) ─────
+async function maybeInitOrder() {
+  const snap = await get(orderRef);
+  if (snap.exists()) return; // already set up
+  setSyncStatus('init');
+  const initialOrder = {};
+  PHASE_DEFS.forEach(p => {
+    initialOrder[p.id] = TASK_DEFS.filter(t => t.phase === p.id).map(t => t.id);
+  });
+  await set(orderRef, initialOrder);
+}
+
+// ── Firebase listeners ─────────────────────────────────
+onValue(checkRef,  s => { checkedState = s.val()||{}; renderIfReady(); });
+onValue(customRef, s => { customState  = s.val()||{}; renderIfReady(); });
+onValue(orderRef,  s => {
+  if (!s.exists()) return;
+  orderState = s.val()||{};
+  initialized = true;
+  renderIfReady();
+});
+
+let renderPending = false;
+function renderIfReady() {
+  if (!initialized) return;
+  if (renderPending) return;
+  renderPending = true;
+  requestAnimationFrame(() => { renderPending = false; render(); });
+}
+
+// ── Toggle checked ─────────────────────────────────────
+function toggleTask(id) {
+  setSyncStatus('saving');
+  const updates = {};
+  updates[id] = !checkedState[id] || null;
+  update(checkRef, updates);
+}
+
+// ── Add custom task ────────────────────────────────────
+function addCustomTask(phaseId, text, owner) {
+  if (!text.trim()) return;
+  setSyncStatus('saving');
+  // push to get a unique key
+  const newRef = push(customRef, {phase: phaseId, owner, text: text.trim()});
+  const newKey = 'custom:' + newRef.key;
+  // append to order for this phase
+  const phaseOrder = [...(orderState[phaseId]||[]), newKey];
+  update(orderRef, {[phaseId]: phaseOrder});
+}
+
+// ── Delete custom task ─────────────────────────────────
+function deleteCustomTask(phaseId, firebaseKey) {
+  if (!confirm('Delete this custom task?')) return;
+  setSyncStatus('saving');
+  remove(ref(db, 'custom/' + firebaseKey));
+  // remove from order
+  const phaseOrder = (orderState[phaseId]||[]).filter(id => id !== 'custom:' + firebaseKey);
+  update(orderRef, {[phaseId]: phaseOrder});
+  // remove checked state
+  update(checkRef, {['custom:' + firebaseKey]: null});
+}
+
+// ── Save new order after drag ──────────────────────────
+function saveOrder(phaseId, newOrder) {
+  setSyncStatus('saving');
+  update(orderRef, {[phaseId]: newOrder});
+}
+
+// ── Resolve a task ID to {id, owner, text, isCustom} ──
+function resolveTask(tid) {
+  if (tid.startsWith('custom:')) {
+    const key = tid.slice(7);
+    const ct = customState[key];
+    if (!ct) return null;
+    return {id: tid, owner: ct.owner, text: ct.text, isCustom: true, firebaseKey: key, phase: ct.phase};
+  }
+  const def = TASK_MAP[tid];
+  if (!def) return null;
+  return {id: tid, owner: def.owner, text: def.text, isCustom: false, phase: def.phase};
+}
+
+// ── Render ─────────────────────────────────────────────
+function render() {
+  // Progress
+  let total=0, done=0;
+  PHASE_DEFS.forEach(p => {
+    const order = orderState[p.id]||[];
+    order.forEach(tid => {
+      const t = resolveTask(tid);
+      if (!t) return;
+      if (currentFilter !== 'all' && t.owner !== currentFilter) return;
+      total++;
+      if (checkedState[tid]) done++;
+    });
+  });
+  const pct = total>0 ? Math.round(done/total*100) : 0;
+  document.getElementById('progress-text').textContent = done+' of '+total+' tasks done';
+  document.getElementById('progress-pct').textContent  = pct+'%';
+  document.getElementById('progress-fill').style.width  = pct+'%';
+
+  // Filter buttons
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    const f = btn.dataset.filter;
+    btn.className = 'filter-btn'+(f===currentFilter?' active-'+f:'');
+  });
+
+  const container = document.getElementById('phases');
+  container.innerHTML = '';
+
+  PHASE_DEFS.forEach(phase => {
+    const order = orderState[phase.id]||[];
+    const visibleOrder = currentFilter==='all' ? order : order.filter(tid => {
+      const t = resolveTask(tid); return t && t.owner===currentFilter;
+    });
+
+    // Count done for phase header
+    const phaseDone = order.filter(tid => {
+      const t = resolveTask(tid);
+      return t && checkedState[tid] && (currentFilter==='all'||t.owner===currentFilter);
+    }).length;
+    const phaseTotal = visibleOrder.length;
+
+    const card = document.createElement('div');
+    card.className = 'phase-card';
+    card.style.border = '1px solid '+phase.color+'44';
+
+    // Header
+    const hdr = document.createElement('button');
+    hdr.className = 'phase-header';
+    hdr.style.background = 'linear-gradient(135deg,'+phase.color+'22 0%,transparent 100%)';
+    const isOpen = expanded[phase.id];
+    if (isOpen) hdr.style.borderBottom = '1px solid '+phase.color+'33';
+    hdr.innerHTML =
+      '<div class="phase-header-info">'+
+        '<div class="phase-title-row"><span class="phase-dot" style="background:'+phase.accent+'"></span><span class="phase-title-text">'+phase.title+'</span></div>'+
+        '<div class="phase-meta"><span class="phase-timeline">'+phase.timeline+'</span><span class="phase-count" style="color:'+phase.accent+'">'+phaseDone+'/'+phaseTotal+' done</span></div>'+
+      '</div>'+
+      '<span class="phase-chevron'+(isOpen?' open':'')+'">&#8250;</span>';
+    hdr.addEventListener('click', () => { expanded[phase.id]=!expanded[phase.id]; render(); });
+    card.appendChild(hdr);
+
+    if (!isOpen) { container.appendChild(card); return; }
+
+    // Task list
+    const ul = document.createElement('ul');
+    ul.className = 'task-list';
+    ul.dataset.phase = phase.id;
+
+    // We render all tasks in the phase order but only show visible ones
+    // For drag-drop we need to know full order indices
+    order.forEach((tid, fullIdx) => {
+      const t = resolveTask(tid);
+      if (!t) return;
+      if (currentFilter !== 'all' && t.owner !== currentFilter) return;
+
+      const isDone = !!checkedState[tid];
+      const oc = ownerColors[t.owner]||ownerColors.both;
+
+      const li = document.createElement('li');
+      li.className = 'task-item'+(isDone?' done':'');
+      li.style.background = isDone ? 'rgba(255,255,255,0.015)' : 'transparent';
+      li.draggable = true;
+      li.dataset.tid = tid;
+      li.dataset.fullIdx = fullIdx;
+      li.dataset.phase = phase.id;
+
+      // Drag handle
+      const handle = document.createElement('span');
+      handle.className = 'drag-handle';
+      handle.innerHTML = '&#8942;&#8942;';
+      handle.title = 'Drag to reorder';
+
+      // Checkbox
+      const checkWrap = document.createElement('div');
+      checkWrap.className = 'task-check-wrap';
+      const box = document.createElement('div');
+      box.className = 'task-check';
+      box.style.border = '2px solid '+(isDone?phase.accent:'#2A3A4A');
+      box.style.background = isDone?phase.accent:'transparent';
+      if (isDone) { const mk=document.createElement('span'); mk.className='task-check-mark'; mk.textContent='\u2713'; box.appendChild(mk); }
+      checkWrap.appendChild(box);
+      checkWrap.addEventListener('click', e => { e.stopPropagation(); toggleTask(tid); });
+
+      // Text
+      const txt = document.createElement('div');
+      txt.className = 'task-text';
+      txt.textContent = t.text;
+      txt.addEventListener('click', () => toggleTask(tid));
+
+      li.appendChild(handle);
+      li.appendChild(checkWrap);
+      li.appendChild(txt);
+
+      // Custom tag + delete
+      if (t.isCustom) {
+        const tag = document.createElement('span');
+        tag.className = 'custom-tag';
+        tag.textContent = 'CUSTOM';
+        li.appendChild(tag);
+      }
+
+      // Owner badge
+      const badge = document.createElement('div');
+      badge.className = 'task-owner-badge';
+      badge.textContent = oc.label;
+      badge.style.background = oc.bg;
+      badge.style.color = oc.text;
+      badge.style.border = '1px solid '+oc.text+'33';
+      li.appendChild(badge);
+
+      if (t.isCustom) {
+        const del = document.createElement('button');
+        del.className = 'delete-task-btn';
+        del.textContent = '\u00d7';
+        del.title = 'Delete task';
+        del.addEventListener('click', e => { e.stopPropagation(); deleteCustomTask(phase.id, t.firebaseKey); });
+        li.appendChild(del);
+      }
+
+      // ── Drag events ──
+      li.addEventListener('dragstart', e => {
+        dragSrcPhase = phase.id;
+        dragSrcIdx   = parseInt(li.dataset.fullIdx);
+        li.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', tid);
+      });
+      li.addEventListener('dragend', () => {
+        li.classList.remove('dragging');
+        document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+      });
+      li.addEventListener('dragover', e => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+        li.classList.add('drag-over');
+      });
+      li.addEventListener('drop', e => {
+        e.preventDefault();
+        li.classList.remove('drag-over');
+        const targetPhase = parseInt(li.dataset.phase);
+        const targetIdx   = parseInt(li.dataset.fullIdx);
+        if (dragSrcPhase !== targetPhase) return; // cross-phase drag not supported
+        if (dragSrcIdx === targetIdx) return;
+        const newOrder = [...(orderState[targetPhase]||[])];
+        const [moved] = newOrder.splice(dragSrcIdx, 1);
+        newOrder.splice(targetIdx, 0, moved);
+        orderState[targetPhase] = newOrder; // optimistic local update
+        saveOrder(targetPhase, newOrder);
+        render();
+      });
+
+      ul.appendChild(li);
+    });
+
+    card.appendChild(ul);
+
+    // Add task button + form
+    const addRow = document.createElement('div');
+    addRow.className = 'add-task-row';
+    const addBtn = document.createElement('button');
+    addBtn.className = 'add-task-btn';
+    addBtn.innerHTML = '<span style="font-size:16px;line-height:1">+</span> Add a task to this phase';
+    addRow.appendChild(addBtn);
+    card.appendChild(addRow);
+
+    const form = document.createElement('div');
+    form.className = 'add-task-form';
+    form.innerHTML =
+      '<textarea class="add-task-input" rows="2" placeholder="Describe the task\u2026"></textarea>'+
+      '<div class="add-task-controls">'+
+        '<select class="owner-select"><option value="both">Both</option><option value="him">Him</option><option value="her">Her</option></select>'+
+        '<button class="save-task-btn">Save task</button>'+
+        '<button class="cancel-task-btn">Cancel</button>'+
+      '</div>';
+    card.appendChild(form);
+
+    addBtn.addEventListener('click', () => { form.classList.add('open'); addRow.style.display='none'; form.querySelector('textarea').focus(); });
+    form.querySelector('.cancel-task-btn').addEventListener('click', () => { form.classList.remove('open'); addRow.style.display='flex'; form.querySelector('textarea').value=''; });
+    form.querySelector('.save-task-btn').addEventListener('click', () => {
+      const text  = form.querySelector('textarea').value;
+      const owner = form.querySelector('select').value;
+      if (!text.trim()) return;
+      addCustomTask(phase.id, text, owner);
+      expanded[phase.id] = true;
+      form.classList.remove('open');
+      addRow.style.display = 'flex';
+      form.querySelector('textarea').value = '';
+    });
+
+    container.appendChild(card);
+  });
+
+  setSyncStatus('connected');
+}
+
+// ── Filters ────────────────────────────────────────────
+document.getElementById('filters').addEventListener('click', e => {
+  const btn = e.target.closest('.filter-btn');
+  if (btn) { currentFilter = btn.dataset.filter; render(); }
+});
+
+// ── Boot ───────────────────────────────────────────────
+setSyncStatus('connecting');
+maybeInitOrder();
+</script>
+</body>
+</html>
